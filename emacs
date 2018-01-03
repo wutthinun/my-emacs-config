@@ -4,6 +4,7 @@
 (set-frame-font "Monaco-16")
 (set-frame-name "Emacs")
 (global-hl-line-mode t)
+(global-linum-mode 1)
 
 (require 'package)
 (add-to-list 'package-archives
@@ -44,37 +45,45 @@
 ;; (setq ido-everywhere t)
 ;; (ido-mode 1)
 
-(use-package counsel
-  :ensure t)
+;; (use-package counsel
+;;   :ensure t)
 
-(use-package ag
-  :ensure t)
+;; (use-package swiper
+;;   :ensure t
+;;   :bind (
+;; 	("\C-s" . swiper)
+;; 	("C-c C-r" . ivy-resume)
+;; 	("<f6>" . ivy-resume)
+;; 	("M-x" . counsel-M-x)
+;; 	("C-x C-f" . counsel-find-file)
+;; 	("<f1> f" . counsel-describe-function)
+;; 	("<f1> v" . counsel-describe-variable)
+;; 	("<f1> l" . counsel-find-library)
+;; 	("<f2> i" . counsel-info-lookup-symbol)
+;; 	("<f2> " . counsel-unicode-char)
+;; 	("C-c g" . counsel-git)
+;; 	("C-c j" . counsel-git-grep)
+;; 	("C-c k" . counsel-ag)
+;; 	("C-x l" . counsel-locate)
+;; 	("C-S-o" . counsel-rhythmbox))
+;;   :config
+;;   (progn
+;; 	(ivy-mode 1)
+;; 	(setq ivy-use-virtual-buffers t)
+;; 	(setq enable-recursive-minibuffers t)
+;; 	(define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
+;;   ))
 
-(use-package swiper
-  :ensure t
-  :bind (
-	("\C-s" . swiper)
-	("C-c C-r" . ivy-resume)
-	("<f6>" . ivy-resume)
-	("M-x" . counsel-M-x)
-	("C-x C-f" . counsel-find-file)
-	("<f1> f" . counsel-describe-function)
-	("<f1> v" . counsel-describe-variable)
-	("<f1> l" . counsel-find-library)
-	("<f2> i" . counsel-info-lookup-symbol)
-	("<f2> u" . counsel-unicode-char)
-	("C-c g" . counsel-git)
-	("C-c j" . counsel-git-grep)
-	("C-c k" . counsel-ag)
-	("C-x l" . counsel-locate)
-	("C-S-o" . counsel-rhythmbox))
-  :config
-  (progn
-	(ivy-mode 1)
-	(setq ivy-use-virtual-buffers t)
-	(setq enable-recursive-minibuffers t)
-	(define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
-  ))
+;; (use-package projectile
+;;   :ensure t
+;;   :config
+;;   (projectile-global-mode)
+;;   (setq projectile-completion-system 'ivy))
+
+;; (use-package counsel-projectile
+;;   :ensure t
+;;   :config
+;;   (counsel-projectile-on))
 
 (use-package avy
   :ensure t
@@ -107,23 +116,34 @@
   (setq web-mode-anable-auto-closing t)
   (setq web-mode-anable-auto-quoting t))
 
-(use-package projectile
+
+
+;; Helm ====================================
+(use-package helm
   :ensure t
   :config
-  (projectile-global-mode)
-  (setq projectile-completion-system 'ivy))
-
-;; (use-package counsel-projectile
-;;   :ensure t
-;;   :config
-;;   (counsel-projectile-on))
-
-(use-package helm
-  :ensure t)
+  (helm-mode 1)
+  (global-set-key (kbd "M-x") 'helm-M-x)
+  (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+  (global-set-key (kbd "C-x C-f") #'helm-find-files)
+  (global-set-key (kbd "C-x b") #'helm-mini))
 
 
 (use-package helm-ag
-  :ensure t)
+  :ensure t
+  :config
+  (global-set-key (kbd "C-s") #'helm-do-ag-this-file))
+
+(use-package helm-projectile
+  :ensure t
+  :config
+  (helm-projectile-on))
+
+(use-package ac-helm
+  :ensure t
+  :config
+  (global-set-key (kbd "C-:") 'ac-complete-with-helm)
+  (define-key ac-complete-mode-map (kbd "C-:") 'ac-complete-with-helm))
 
 (use-package emmet-mode
   :ensure t
@@ -132,67 +152,9 @@
   (add-hook 'web-mode-hook 'emmet-mode)
   (add-hook 'css-mode-hook 'emmet-mode))
 
-(use-package treemacs
-  :ensure t
-  :defer t
-  :config
-  (progn
-    (use-package treemacs-evil
-      :ensure t
-      :demand t)
-    (setq treemacs-follow-after-init          t
-          treemacs-width                      35
-          treemacs-indentation                2
-          treemacs-collapse-dirs              (if (executable-find "python") 3 0)
-          treemacs-silent-refresh             nil
-          treemacs-change-root-without-asking nil
-          treemacs-sorting                    'alphabetic-desc
-          treemacs-show-hidden-files          t
-          treemacs-never-persist              nil
-          treemacs-is-never-other-window      nil
-          treemacs-goto-tag-strategy          'refetch-index)
+(use-package neotree
+  :ensure t)
 
-    (treemacs-follow-mode t)
-    (treemacs-filewatch-mode t)
-    (pcase (cons (not (null (executable-find "git")))
-                 (not (null (executable-find "python3"))))
-      (`(t . t)
-       (treemacs-git-mode 'extended))
-      (`(t . _)
-       (treemacs-git-mode 'simple))))
-  :bind
-  (:map global-map
-        ([f8]         . treemacs-toggle)
-        ("M-0"        . treemacs-select-window)
-        ("C-c 1"      . treemacs-delete-other-windows)
-        ("M-n ft"     . treemacs-toggle)
-        ("M-n fT"     . treemacs)
-        ("M-n fB"     . treemacs-bookmark)
-        ("M-n f C-t"  . treemacs-find-file)
-        ("M-n f M-t"  . treemacs-find-tag)))
-(use-package treemacs-projectile
-  :defer t
-  :ensure t
-  :config
-  (setq treemacs-header-function #'treemacs-projectile-create-header)
-  :bind (:map global-map
-              ("M-n fP" . treemacs-projectile)
-              ("M-n fp" . treemacs-projectile-toggle))
-  )
-
+(use-package ag
+  :ensure t)
 ;; ====================================================
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (treemacs-projectile emmet-mode emmet helm ag web-mode which-key use-package solarized-theme smex org-bullets lorem-ipsum iedit evil counsel avy auto-complete))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-(put 'narrow-to-region 'disabled nil)
