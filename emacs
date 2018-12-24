@@ -157,4 +157,43 @@
 
 (use-package ag
   :ensure t)
+  
+ (use-package go-mode
+  :ensure t
+  :config
+  (setq gofmt-command "goimports")
+  (add-hook 'before-save-hook 'gofmt-before-save))
+
+(use-package flycheck
+  :ensure t)
+
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
+
+(use-package auto-complete
+  :ensure t
+  :config (ac-config-default))
+
+(use-package go-autocomplete
+  :ensure t)
+
+(use-package go-guru
+  :ensure t)
+
+(use-package lsp-mode
+  :ensure t
+  :commands lsp)
+
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+ 
+(use-package company-lsp
+  :ensure t
+  :commands company-lsp)
+  
 ;; ====================================================
